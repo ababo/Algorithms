@@ -262,9 +262,9 @@ public class RopeString {
   }
 
   // inner class for convenience
-  static class Pair<Rope> {
-    Rope left;
-    Rope right;
+  public static class Pair<Rope> {
+    public Rope left;
+    public Rope right;
 
     public Pair(Rope left, Rope right) {
       this.left = left;
