@@ -305,7 +305,7 @@ $ java -cp classes com.williamfiset.algorithms.search.BinarySearch
 - [Manacher's algorithm (finds all palindromes in text)](https://github.com/williamfiset/algorithms/tree/master/src/main/java/com/williamfiset/algorithms/strings/ManachersAlgorithm.java) **- O(n)**
 - [Rabin-Karp algorithm (finds pattern match positions in text)](https://github.com/williamfiset/algorithms/tree/master/src/main/java/com/williamfiset/algorithms/strings/RabinKarp.java) **- O(n+m)**
 - [Substring verification with suffix array](https://github.com/williamfiset/algorithms/tree/master/src/main/java/com/williamfiset/algorithms/strings/SubstringVerificationSuffixArray.java) **- O(nlog(n)) SA construction and O(mlog(n)) per query**
-- [RopeString data structure](https://github.com/williamfiset/Algorithms/tree/rope-implement/src/main/java/com/williamfiset/algorithms/strings/RopeString.java) **- O(log n) insertion without rebalancing / O(n) worst case, O(log n) deletion**
+- [RopeString data structure](https://github.com/williamfiset/Algorithms/tree/master/src/main/java/com/williamfiset/algorithms/strings/RopeString.java) **- O(log n) insertion without rebalancing / O(n) worst case, O(log n) deletion**
 # License
 
 This repository is released under the [MIT license](https://opensource.org/licenses/MIT). In short, this means you are free to use this software in any personal, open-source or commercial projects. Attribution is optional but appreciated.
