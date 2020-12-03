@@ -12,40 +12,44 @@ import java.util.List;
 public class RopeString {
   Node root;
 
-  // construct rope from string value with only one leaf node
+  // Construct rope from string value with only one leaf node
   public RopeString(String value) {
     this.root = new Node(value);
   }
 
-  // construct rope from node. Node will be root of rope
-  public RopeString(Node node) {
+  // Construct rope from node. Node will be root of rope
+  private RopeString(Node node) {
     this.root = node;
   }
 
-  // add value to the end
+  // Add value to the end
   public void append(String value) {
     root = concatenate(this, new RopeString(value)).root;
   }
 
-  // split rope into two by index
+  // Split rope into two by index
   public Pair<RopeString> split(int index) {
-    Node left = new Node();
-    Node right = new Node();
-    createBranches(left, right, root, index);
-    cleanUp(left);
-    cleanUp(right);
-    return new Pair<>(new RopeString(left), new RopeString(right));
+    if (index < 0 || index > root.weight) {
+      throw new IndexOutOfBoundsException();
+    }
+    Pair<Node> branches = createBranches(new Node(), new Node(), root, index);
+    cleanUp(branches.left);
+    cleanUp(branches.right);
+    return new Pair<>(new RopeString(branches.left), new RopeString(branches.right));
   }
 
-  // insert string in specific position
+  // Insert string in specific position
   public void insert(String value, int position) {
+    if (position < 0 || position > root.weight) {
+      throw new IndexOutOfBoundsException();
+    }
     Pair<RopeString> ropePair = split(position);
     RopeString firstConcat = concatenate(ropePair.left, new RopeString(value));
     RopeString concatenate = concatenate(firstConcat, ropePair.right);
     this.root = concatenate.root;
   }
 
-  // remove specific size of chars, started from position
+  // Remove specific size of chars, started from position
   public void delete(int position, int size) {
     if (size < 0 || position < 0 || position + size > root.weight) {
       throw new IndexOutOfBoundsException();
@@ -56,7 +60,7 @@ public class RopeString {
     this.root = concatenate.root;
   }
 
-  // transform value to java string.
+  // Transform value to java string.
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();
@@ -64,26 +68,27 @@ public class RopeString {
     return builder.toString();
   }
 
-  // rebalance tree to optimal condition
+  // Rebalance tree to optimal condition
   public void rebalance() {
     List<Node> nodes = new ArrayList<>();
     collectAll(root, nodes);
     root = combine(nodes, 0, nodes.size());
   }
 
-  // create two branches from left and right node
+  // Create two branches from left and right node
   // if current node has no child - it's leaf
-  private void createBranches(Node left, Node right, Node current, int index) {
+  private Pair<Node> createBranches(Node left, Node right, Node current, int index) {
     if (current.isLeaf()) {
-      splitLeaf(left, right, current, index);
+      return splitLeaf(left, right, current, index);
     } else {
-      splitNotLeaf(left, right, current, index);
+      return splitNotLeaf(left, right, current, index);
     }
   }
 
-  // recursively goes by rope to index, and create two new ropes in process.
+  // Recursively goes by rope to index, and create two new ropes in process.
   // Node left and Node right is just two new Node which will be result of split.
-  private void splitNotLeaf(Node left, Node right, Node current, int index) {
+  private Pair<Node> splitNotLeaf(Node left, Node right, Node current, int index) {
+    Pair<Node> nodePair;
     left = createNodeIfNull(left);
     right = createNodeIfNull(right);
     current.left = createNodeIfNull(current.left);
@@ -94,14 +99,17 @@ public class RopeString {
     if (index < current.left.weight) {
       right.right = current.right;
       right.left = new Node();
-      createBranches(left, right.left, current.left, index);
+      nodePair = createBranches(left, right.left, current.left, index);
       right.depth = calculateDepth(right) + 1;
     } else {
       left.left = current.left;
       left.right = new Node();
-      createBranches(left.right, right, current.right, index - current.left.weight);
+      nodePair = createBranches(left.right, right, current.right, index - current.left.weight);
       left.depth = calculateDepth(left) + 1;
     }
+    nodePair.left = left;
+    nodePair.right = right;
+    return nodePair;
   }
 
   private Node createNodeIfNull(Node node) {
@@ -111,9 +119,9 @@ public class RopeString {
     return node;
   }
 
-  // if current node leaf, split string, and set left part to left node, and right part to right
+  // If current node leaf, split string, and set left part to left node, and right part to right
   // node.
-  private void splitLeaf(Node left, Node right, Node current, int index) {
+  private Pair<Node> splitLeaf(Node left, Node right, Node current, int index) {
     String splitValue = current.value;
     int length = splitValue.length();
     if (index > 0) {
@@ -126,9 +134,10 @@ public class RopeString {
     }
     left.depth = 0;
     right.depth = 0;
+    return new Pair<>(left, right);
   }
 
-  // merge two ropes to one parent
+  // Merge two ropes to one parent
   // return new parent
   private RopeString concatenate(RopeString left, RopeString right) {
     if (left == null || right == null) {
@@ -143,7 +152,7 @@ public class RopeString {
     return new RopeString(rootNode);
   }
 
-  // recursively clean from nulled nodes,
+  // Recursively clean from nulled nodes,
   // if node have only one child, delete node, and set child to node's parent.
   private void cleanUp(Node node) {
     if (node == null || node.isLeaf()) {
@@ -173,7 +182,7 @@ public class RopeString {
     }
   }
 
-  // calculates the depth of the node tree (without node itself)
+  // Calculates the depth of the node tree (without node itself)
   private int calculateDepth(Node node) {
     Node left = node.left;
     Node right = node.right;
@@ -182,7 +191,7 @@ public class RopeString {
     return Math.max(leftDepth, rightDepth);
   }
 
-  // recursively populate stringBuilder by nodes values
+  // Recursively populate stringBuilder by nodes values
   private void createString(Node node, StringBuilder builder) {
     if (node == null) {
       return;
@@ -195,7 +204,7 @@ public class RopeString {
     createString(node.right, builder);
   }
 
-  // collect all leafs to nodeList
+  // Collect all leafs to nodeList
   private void collectAll(Node node, List<Node> nodeList) {
     if (node == null) {
       return;
@@ -208,7 +217,7 @@ public class RopeString {
     collectAll(node.right, nodeList);
   }
 
-  // combine all nodes to parents
+  // Combine all nodes to parents
   private Node combine(List<Node> nodeList, int start, int end) {
     int range = end - start;
     switch (range) {
@@ -222,7 +231,7 @@ public class RopeString {
     }
   }
 
-  // create parent node for two orphans
+  // Create parent node for two orphans
   private Node createParentNode(Node left, Node right) {
     Node node = new Node();
     node.weight = left.weight + right.weight;
@@ -232,9 +241,8 @@ public class RopeString {
     return node;
   }
 
-  // node of the Rope tree
+  // Node of the Rope tree
   static class Node {
-
     Node left;
     Node right;
     // String contained in node, if exists
@@ -244,14 +252,14 @@ public class RopeString {
     // Length of child chains
     int depth;
 
-    public Node() {}
+    Node() {}
 
-    public Node(String value) {
+    Node(String value) {
       this.value = value;
       this.weight = value.length();
     }
 
-    public boolean isLeaf() {
+    boolean isLeaf() {
       return left == null && right == null;
     }
 
@@ -261,7 +269,7 @@ public class RopeString {
     }
   }
 
-  // inner class for convenience
+  // Inner class for convenience
   public static class Pair<Rope> {
     public Rope left;
     public Rope right;
